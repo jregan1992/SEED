@@ -1,7 +1,7 @@
 # SEED
 SEED Lab
 
-Please don't fuck things up
+Please don't fuck things up\n
 
 Helpful git commands:
 ```bash
