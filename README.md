@@ -2,6 +2,7 @@
 SEED Lab
 
 Please don't fuck things up
+
 Helpful git commands:
 ```bash
 git branch
