@@ -4,6 +4,8 @@ SEED Lab
 Please don't fuck things up
 
 Comp Vision - Jamie and Hayden
+
+
 Controls - Caitlin and Tim
 
 Helpful git commands:
