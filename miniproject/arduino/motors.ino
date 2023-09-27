@@ -41,7 +41,7 @@ void motors_init() {
 }
 
 // set motor enable pin, false means motors coast
-void enable_motors(bool enabled) {
+void motors_enable(bool enabled) {
   digitalWrite(nD2, enabled);
 }
 

@@ -14,7 +14,7 @@ const uint8_t right_B = 6;
 // important constants
 const double robot_width = 37.5; // centimeters
 const double wheel_circ = 47.1; // wheel circumference, centimeters
-const uint16_t cpr = 3200; // encoder counts per wheel rotation
+const double cpr = 3200; // encoder counts per wheel rotation
 
 
 // inititalize encoders, call from setup()

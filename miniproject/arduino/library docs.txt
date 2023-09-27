@@ -1,0 +1,78 @@
+EENG 350, Localization and Control Libraries
+
+
+motors.ino
+ - wraps motor pins in functions and stores motor pin assignments
+
+ void motors_init()
+    - sets up motors, call from setup()
+
+ void motors_enable(bool enabled)
+    - sets the motor enable pin, when disabled motors are allowed to coast
+
+ void set_dir(bool reverse)
+ void set_dir_left(bool reverse)
+ void set_dir_right(bool reverse) 
+    - sets motor direction pin for both motors or individually, true is reverse
+
+ void set_pwm(uint8_t duty)
+ void set_pwm_left(uint8_t duty)
+ void set_pwm_right(uint8_t duty)
+    - sets PWM value on both motors or individually, higher values correspond to higher voltage
+
+
+
+encoders.ino
+ - wraps encoder pins in functions and stores assignments
+ - tracks position of the robot
+
+ const double robot_width
+    - robot width, unit here determines distance unit for encoders.ino
+ 
+ const double wheel_circ
+    - wheel circumference, unit should match unit of robot_width
+ 
+ const double cpr
+    - encoder counts per rotation of the wheel
+
+ void encoders_init()
+    - sets up encoders, call from setup()
+
+ int32_t get_pos_left()
+ int32_t get_pos_right()
+    - gets current wheel position in encoder counts
+
+ double get_pos_x()
+ double get_pos_y()
+ double get_pos_phi()
+    - gets current position of the robot, x y and rotation, considering the initial position to be the origin
+    - units will be in the same units as robot_width and wheel_circ!!
+
+ double get_vel_left()
+ double get_vel_right()
+    - gets current linear velocity of left or right wheel
+
+
+
+control.ino
+ - contains the feedback control loop for the wheels
+
+ const double Kp
+    - P constant
+ 
+ const double Ki
+    - I constant
+
+ void control_init()
+    - sets up control loop, call from setup()
+
+ uint8_t get_pwm_left()
+ uint8_t get_pwm_right()
+ bool get_dir_left()
+ bool get_dir_right()
+    - get current PWM and direction commands being issued by the control loop
+
+ set_pos(int32_t p)
+ set_pos_left(int32_t p)
+ set_pos_right(int32_t p)
+    - set desired position for both wheels or individually, units in encoder counts
