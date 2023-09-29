@@ -37,8 +37,8 @@ void receiveEvent(uint8_t count) {
     right_angle = Wire.read();
 
     // set desired positions
-    set_pos_left(left_angle * (3200/4));
-    set_pos_right(right_angle * (3200/4));
+    control_pos_left(left_angle * (3200/4));
+    control_pos_right(right_angle * (3200/4));
   }
 }
 
