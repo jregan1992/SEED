@@ -18,9 +18,9 @@ const uint8_t right_B = 6;
 
 
 // inititalize encoders, call from setup()
-bool inited = false;
+bool encoders_inited = false;
 void encoders_init() {
-  inited = true;
+  encoders_inited = true;
   // set pin modes
   pinMode(left_A, INPUT_PULLUP);
   pinMode(left_B, INPUT_PULLUP);
@@ -101,12 +101,12 @@ volatile uint32_t last_time = 0;
 // this runs on a timer ISR to update position
 void _update_pos() {
   // convert encoder counts to meters
-  double del_left_m = (left_pos - last_left) * (wheel_circ / cpr);
-  double del_right_m = (right_pos - last_right) * (wheel_circ / cpr);
+  double del_left_m = (left_pos - last_left) * (WHEEL_CIRC / CPR);
+  double del_right_m = (right_pos - last_right) * (WHEEL_CIRC / CPR);
   // update pos
   pos_x = pos_x + cos(pos_phi)*(del_left_m + del_right_m)/2.0d;
   pos_y = pos_y + sin(pos_phi)*(del_left_m + del_right_m)/2.0d;
-  pos_phi = pos_phi + (del_left_m - del_right_m)/robot_width;
+  pos_phi = pos_phi + (del_left_m - del_right_m)/ROBOT_WIDTH;
   // update last
   last_left = left_pos;
   last_right = right_pos;
@@ -127,5 +127,5 @@ double encoders_vel_right() { return vel_right; }
 
 // register update ISR
 ISR(TIMER2_COMPA_vect) {
-  if (inited) _update_pos();
+  if (encoders_inited) _update_pos();
 }
