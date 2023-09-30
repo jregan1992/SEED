@@ -34,37 +34,37 @@ void motors_init() {
   pinMode(M1FB, INPUT);
   pinMode(M2FB, INPUT);
   // turn on the motors
-  enable_motors(true);
+  motors_enable(true);
   // default to forward
-  set_dir(false);
-  set_pwm(0);
+  motors_dir(false);
+  motors_pwm(0);
 }
 
 // set motor enable pin, false means motors coast
-void enable_motors(bool enabled) {
+void motors_enable(bool enabled) {
   digitalWrite(nD2, enabled);
 }
 
 // set motor directions, true is reverse
-void set_dir(bool reverse) {
-  set_dir_left(reverse);
-  set_dir_right(reverse);
+void motors_dir(bool reverse) {
+  motors_dir_left(reverse);
+  motors_dir_right(reverse);
 }
-void set_dir_left(bool reverse) {
+void motors_dir_left(bool reverse) {
   digitalWrite(M1DIR, reverse);
 }
-void set_dir_right(bool reverse) {
+void motors_dir_right(bool reverse) {
   digitalWrite(M2DIR, reverse);
 }
 
 // set motor PWM, high means motor is on
-void set_pwm(uint8_t duty) {
-  set_pwm_left(duty);
-  set_pwm_right(duty);
+void motors_pwm(uint8_t duty) {
+  motors_pwm_left(duty);
+  motors_pwm_right(duty);
 }
-void set_pwm_left(uint8_t duty) {
+void motors_pwm_left(uint8_t duty) {
   analogWrite(M1PWM, duty);
 }
-void set_pwm_right(uint8_t duty) {
+void motors_pwm_right(uint8_t duty) {
   analogWrite(M2PWM, duty);
 }

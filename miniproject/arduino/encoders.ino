@@ -12,21 +12,23 @@ const uint8_t right_A = 3;
 const uint8_t right_B = 6;
 
 // important constants
-const double robot_width = 37.5; // centimeters
-const double wheel_circ = 47.1; // wheel circumference, centimeters
-const uint16_t cpr = 3200; // encoder counts per wheel rotation
+#define ROBOT_WIDTH 37.5 // centimeters
+#define WHEEL_CIRC 47.1 // wheel circumference, centimeters
+#define CPR 3200 // encoder counts per wheel rotation
 
 
 // inititalize encoders, call from setup()
+bool inited = false;
 void encoders_init() {
+  inited = true;
   // set pin modes
   pinMode(left_A, INPUT_PULLUP);
   pinMode(left_B, INPUT_PULLUP);
   pinMode(right_A, INPUT_PULLUP);
   pinMode(right_B, INPUT_PULLUP);
   // register interrupts
-  attachInterrupt(digitalPinToInterrupt(left_A), left_ISR, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(right_A), right_ISR, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(left_A), _left_ISR, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(right_A), _right_ISR, CHANGE);
   // timer interrupt for keeping track of position
   // set up timer2
   TCCR2A = 0;
@@ -41,7 +43,7 @@ volatile bool left_sA = false;
 volatile bool left_sB = false;
 volatile int32_t left_pos = 0;
 // ISR for left encoder
-void left_ISR() {
+void _left_ISR() {
   // read encoder state
   bool n_sA = digitalRead(left_A);
   bool n_sB = digitalRead(left_B);
@@ -59,14 +61,14 @@ void left_ISR() {
   left_sB = n_sB;
 }
 // getter
-int32_t get_pos_left() { return left_pos; }
+int32_t encoders_pos_left() { return left_pos; }
 
 // right encoder state
 volatile bool right_sA = false;
 volatile bool right_sB = false;
 volatile int32_t right_pos = 0; 
 // ISR for right encoder
-void right_ISR() {
+void _right_ISR() {
   // read encoder state
   bool n_sA = digitalRead(right_A);
   bool n_sB = digitalRead(right_B);
@@ -84,7 +86,7 @@ void right_ISR() {
   right_sB = n_sB;
 }
 // getter
-int32_t get_pos_right() { return right_pos; }
+int32_t encoders_pos_right() { return right_pos; }
 
 // current position/velocity
 volatile double pos_x = 0; // centimeters
@@ -97,7 +99,7 @@ volatile int32_t last_left = 0;
 volatile int32_t last_right = 0;
 volatile uint32_t last_time = 0;
 // this runs on a timer ISR to update position
-void update_pos() {
+void _update_pos() {
   // convert encoder counts to meters
   double del_left_m = (left_pos - last_left) * (wheel_circ / cpr);
   double del_right_m = (right_pos - last_right) * (wheel_circ / cpr);
@@ -116,14 +118,14 @@ void update_pos() {
   last_time = new_time;
 }
 // getters for position
-double get_pos_x() { return pos_x; }
-double get_pos_y() { return pos_y; }
-double get_pos_phi() { return pos_phi; }
+double encoders_pos_x() { return pos_x; }
+double encoders_pos_y() { return pos_y; }
+double encoders_pos_phi() { return pos_phi; }
 // getters for velocity
-double get_vel_left() { return vel_left; }
-double get_vel_right() { return vel_right; }
+double encoders_vel_left() { return vel_left; }
+double encoders_vel_right() { return vel_right; }
 
 // register update ISR
 ISR(TIMER2_COMPA_vect) {
-  update_pos();
+  if (inited) _update_pos();
 }
