@@ -5,8 +5,8 @@ from smbus2 import SMBus
 from time import sleep
 import time
 import math
-##import adafruit_character_lcd.character_lcd_rgb_i2c as character_lcd
-##import board
+import adafruit_character_lcd.character_lcd_rgb_i2c as character_lcd
+import board
 
 
 
@@ -16,11 +16,11 @@ ARD_ADDR = 8
 i2c = SMBus(1)
 right_wheel = int(0)
 left_wheel = int(0)
-##lcd_columns = 16
-##lcd_rows = 2
-##L = board.I2C()
-##lcd = character_lcd.Character_LCD_RGB_I2C(L, lcd_columns, lcd_rows)
-##lcd.clear()
+lcd_columns = 16
+lcd_rows = 2
+L = board.I2C()
+lcd = character_lcd.Character_LCD_RGB_I2C(L, lcd_columns, lcd_rows)
+lcd.clear()
 
 d = 0
 center_x = 0
@@ -119,25 +119,15 @@ while True:
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
-    ##lcd.message = "R: "+str(right_wheel)+"  L: "+str(left_wheel)   
+    lcd.message = "R: "+str(right_wheel)+"  L: "+str(left_wheel)   
     i2c.write_block_data(ARD_ADDR, 0, [int(left_wheel), int(right_wheel)])
-    #i2c.write_i2c_block_data(ARD_ADDR, 1, right_wheel)
     time.sleep(.1)
-
-
-
-
-
-
-
 
 
 
 # Release the camera and close all windows
 cap.release()
 cv2.destroyAllWindows()
-
-
 
 
 # Release the camera and close all windows
