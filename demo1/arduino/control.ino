@@ -11,6 +11,14 @@ const double Kp_vel = 1;
 const double Kp_pos = 0.1;
 const double Ki_pos = 0.001;
 
+// important constants
+#define ROBOT_WIDTH 37.5 // centimeters
+#define WHEEL_CIRC 47.1 // wheel circumference, centimeters
+#define CPR 3200 // encoder counts per wheel rotation
+
+#define MAX_PWM 180
+
+
 // init control
 bool control_inited = false;
 void control_init() {
@@ -56,7 +64,7 @@ void _control_loop() {
   }
   // velocity mode
   v_error = abs(left_dvel) - abs(encoders_vel_left());
-  left_pwm = max(0, min(255, left_pwm + Kp_vel*v_error));
+  left_pwm = max(0, min(MAX_PWM, left_pwm + Kp_vel*v_error));
   left_dir = left_dvel < 0;
 
   // again on the right
@@ -68,7 +76,7 @@ void _control_loop() {
   }
   // velocity mode
   v_error = abs(right_dvel) - abs(encoders_vel_right());
-  right_pwm = max(0, min(255, right_pwm + Kp_vel*v_error));
+  right_pwm = max(0, min(MAX_PWM, right_pwm + Kp_vel*v_error));
   right_dir = right_dvel < 0;
 
   // set motors
@@ -99,6 +107,13 @@ void control_vel(double v) {
 }
 void control_vel_left(double v) { left_dvel = v; left_mode = false; }
 void control_vel_right(double v) { right_dvel = v; right_mode = false; }
+
+// ask for a relative angular change, radians
+void control_angle(double a) {
+  int32_t displacement = (CPR/WHEEL_CIRC) * (ROBOT_WIDTH * a / 2.0);
+  control_pos_left(-displacement);
+  control_pos_right(displacement);
+}
 
 // ISR for control loop
 ISR(TIMER2_COMPB_vect) {
