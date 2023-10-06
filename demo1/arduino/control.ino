@@ -53,8 +53,10 @@ void _control_loop() {
   double v_error = 0;
   double dt = (millis() - last_millis)/1000.0d;
   last_millis = millis();
-  // this is the implementation from the tutorial doc
-  // my prediction is that it won't work at all
+  // this was the implementation from the tutorial doc
+  // my prediction is that it won't work at all, i was right
+  // this line: pwm = Kp_vel*vel_error;   DOES NOT WORK
+  // the real motors cannot have PWM of zero since that will make them brake and completely stop
 
   // mode switch
   if (left_mode) {
