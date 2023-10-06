@@ -60,8 +60,8 @@ void _left_ISR() {
   left_sA = n_sA;
   left_sB = n_sB;
 }
-// getter
-int32_t encoders_pos_left() { return left_pos; }
+// getter, convert to our linear unit
+double encoders_pos_left() { return left_pos * (WHEEL_CIRC/CPR); }
 
 // right encoder state
 volatile bool right_sA = false;
@@ -86,7 +86,7 @@ void _right_ISR() {
   right_sB = n_sB;
 }
 // getter
-int32_t encoders_pos_right() { return right_pos; }
+double encoders_pos_right() { return right_pos * (WHEEL_CIRC/CPR); }
 
 // current position/velocity
 volatile double pos_x = 0; // centimeters

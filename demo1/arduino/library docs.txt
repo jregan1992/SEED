@@ -39,9 +39,9 @@ encoders.ino
  void encoders_init()
     - sets up encoders, call from setup()
 
- int32_t encoders_pos_left()
- int32_t encoders_pos_right()
-    - gets current wheel position in encoder counts
+ double encoders_pos_left()
+ double encoders_pos_right()
+    - gets current wheel position in linear centimeters
 
  double encoders_pos_x()
  double encoders_pos_y()
@@ -76,10 +76,10 @@ control.ino
  bool control_dir_right()
     - get current PWM and direction commands being issued by the control loop
 
- void control_pos(int32_t p)
- void control_pos_left(int32_t p)
- void control_pos_right(int32_t p)
-    - set desired position for both wheels or individually, units in encoder counts
+ void control_pos(double p)
+ void control_pos_left(double p)
+ void control_pos_right(double p)
+    - set desired position for both wheels or individually, units in system units
     - switches wheel into position mode, overriding any velocity command
 
  void control_vel(double v)
@@ -87,3 +87,7 @@ control.ino
  void control_vel_right(double v)
     - set desired velocity for both wheels or individually, units in encoder.ino units
     - switches wheel into velocity mode, overriding any position command
+
+ void control_angle(double a)
+    - sets desired position for both wheels to rotate robot the given number of radians
+    - switches wheel into position mode

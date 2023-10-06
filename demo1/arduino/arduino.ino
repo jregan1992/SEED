@@ -2,84 +2,50 @@
 
 void setup() {
   // Serial
-  Serial.begin(9600);
+  Serial.begin(57600);
   // libraries
   encoders_init();
   motors_init();
   control_init();
-  // and run to 0
-  control_pos(0);
+
+  // given angle (rad, + is left) and distance(ft) here
+  double ang = (PI/180.0d) * 180.0d;
+  double dist = 1.0d * 30.48d;
+
+  // send rotation command and give ample time
+  if (ang != 0.0d) {
+    control_angle(ang);
+    delay(15000);
+  }
+  
+  // send distance command(s), how should we adress this?
+  control_pos_left(encoders_pos_left() + dist);
+  control_pos_right(encoders_pos_right() + dist);
 }
 
 void loop() {
-  // dance
-  control_angle(-0.785);
-  delay(1500);
-  control_angle(0.785);
-  delay(1500);
-  control_angle(0.785);
-  delay(1500);
-  control_angle(-0.785);
-  delay(1500);
-
-  control_angle(3.927);
-  delay(2500);
-  control_angle(-1.571);
-  delay(2000);
-  control_angle(3.927);
-  delay(2500);
-
-  control_angle(6.28);
-  delay(2500);
-  control_angle(6.28);
-  delay(2500);
-
-  sit_stand();
-
-  control_pos_left(500);
-  delay(1000);
-  control_pos_left(0);
-  delay(1000);
-
-  sit_stand();
-
-  control_pos_right(500);
-  delay(1000);
-  control_pos_right(0);
-  delay(1000);
-
-  sit_stand();
-
-  control_angle(-0.785);
-  delay(1000);
-  control_pos(200);
-  delay(1000);
-  control_pos(0);
-  delay(1000);
-  control_angle(0.785);
-  delay(1000);
-
-  sit_stand();
-  
-  control_angle(0.785);
-  delay(1000);
-  control_pos(200);
-  delay(1000);
-  control_pos(0);
-  delay(1000);
-  control_angle(-0.785);
-  delay(1000);
-}
-
-
-// dance steps
-void sit_stand() {
-  control_pos(400);
-  delay(1000);
-  control_pos(0);
-  delay(1000);
-  control_pos(400);
-  delay(1000);
-  control_pos(0);
-  delay(1000);
+  // do nothing, slowly
+  delay(100);
+  /*
+  Serial.print("L igr: ");
+  Serial.print(gimme_integrator());
+  Serial.print(", L vel: ");
+  Serial.print(encoders_vel_left());
+  Serial.print(", L pos: ");
+  Serial.print(encoders_pos_left());
+  Serial.print(", R vel: ");
+  Serial.print(encoders_vel_right());
+  Serial.print(", R pos: ");
+  Serial.print(encoders_pos_right());
+  Serial.println();
+  */
+  /*
+  Serial.print("L dpos: ");
+  Serial.print(gimme_integrator());
+  Serial.print(", L pos: ");
+  Serial.print(encoders_pos_left());
+  Serial.print(", phi: ");
+  Serial.print(encoders_pos_phi());
+  Serial.println();
+  */
 }
