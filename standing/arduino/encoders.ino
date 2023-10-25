@@ -12,8 +12,8 @@ const uint8_t right_A = 3;
 const uint8_t right_B = 6;
 
 // important constants
-#define ROBOT_WIDTH 38.0 // centimeters
-#define WHEEL_CIRC 47.2 // wheel circumference, centimeters
+#define ROBOT_WIDTH 37.5 // centimeters
+#define WHEEL_CIRC 47.1 // wheel circumference, centimeters
 #define CPR 3200 // encoder counts per wheel rotation
 
 
@@ -61,7 +61,7 @@ void _left_ISR() {
   left_sB = n_sB;
 }
 // getter, convert to our linear unit
-double encoders_pos_left() { return left_pos * (WHEEL_CIRC/CPR); }
+float encoders_pos_left() { return left_pos * (WHEEL_CIRC/CPR); }
 
 // right encoder state
 volatile bool right_sA = false;
@@ -86,14 +86,14 @@ void _right_ISR() {
   right_sB = n_sB;
 }
 // getter
-double encoders_pos_right() { return right_pos * (WHEEL_CIRC/CPR); }
+float encoders_pos_right() { return right_pos * (WHEEL_CIRC/CPR); }
 
 // current position/velocity
-volatile double pos_x = 0; // centimeters
-volatile double pos_y = 0; // centimeters
-volatile double pos_phi = 0; // radians
-volatile double vel_left = 0; // cm/s
-volatile double vel_right = 0; // cm/s
+volatile float pos_x = 0; // centimeters
+volatile float pos_y = 0; // centimeters
+volatile float pos_phi = 0; // radians
+volatile float vel_left = 0; // cm/s
+volatile float vel_right = 0; // cm/s
 // keeping track of things
 volatile int32_t last_left = 0;
 volatile int32_t last_right = 0;
@@ -101,8 +101,8 @@ volatile uint32_t last_time = 0;
 // this runs on a timer ISR to update position
 void _update_pos() {
   // convert encoder counts to meters
-  double del_left_m = (left_pos - last_left) * (WHEEL_CIRC / CPR);
-  double del_right_m = (right_pos - last_right) * (WHEEL_CIRC / CPR);
+  float del_left_m = (left_pos - last_left) * (WHEEL_CIRC / CPR);
+  float del_right_m = (right_pos - last_right) * (WHEEL_CIRC / CPR);
   // update pos
   pos_x = pos_x + cos(pos_phi)*(del_left_m + del_right_m)/2.0d;
   pos_y = pos_y + sin(pos_phi)*(del_left_m + del_right_m)/2.0d;
@@ -118,12 +118,12 @@ void _update_pos() {
   last_time = new_time;
 }
 // getters for position
-double encoders_pos_x() { return pos_x; }
-double encoders_pos_y() { return pos_y; }
-double encoders_pos_phi() { return pos_phi; }
+float encoders_pos_x() { return pos_x; }
+float encoders_pos_y() { return pos_y; }
+float encoders_pos_phi() { return pos_phi; }
 // getters for velocity
-double encoders_vel_left() { return vel_left; }
-double encoders_vel_right() { return vel_right; }
+float encoders_vel_left() { return vel_left; }
+float encoders_vel_right() { return vel_right; }
 
 // register update ISR
 ISR(TIMER2_COMPA_vect) {

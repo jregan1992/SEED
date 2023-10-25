@@ -9,18 +9,18 @@ void setup() {
   control_init();
 
   // given angle (rad, + is left) and distance(ft) here
-  double ang = (PI/180.0d) * 180.0d;
-  double dist = 1.0d * 30.48d;
+  double ang = (PI/180.0d) * 360.0d;
+  double dist = 0.0d * 30.48d;
 
   // send rotation command and give ample time
   if (ang != 0.0d) {
     control_angle(ang);
-    delay(15000);
+    //delay(15000);
   }
   
   // send distance command(s), how should we adress this?
-  control_pos_left(encoders_pos_left() + dist);
-  control_pos_right(encoders_pos_right() + dist);
+  //control_pos_left(encoders_pos_left() + dist);
+  //control_pos_right(encoders_pos_right() + dist);
 }
 
 void loop() {
@@ -39,7 +39,7 @@ void loop() {
   Serial.print(encoders_pos_right());
   Serial.println();
   */
-  /*
+  
   Serial.print("L dpos: ");
   Serial.print(gimme_integrator());
   Serial.print(", L pos: ");
@@ -47,5 +47,5 @@ void loop() {
   Serial.print(", phi: ");
   Serial.print(encoders_pos_phi());
   Serial.println();
-  */
+  
 }

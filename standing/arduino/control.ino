@@ -12,8 +12,8 @@ const double Kp_pos = 0.5;
 const double Ki_pos = 1;
 
 // important constants
-#define ROBOT_WIDTH 38.0 // centimeters
-#define WHEEL_CIRC 47.2 // wheel circumference, centimeters
+#define ROBOT_WIDTH 37.5 // centimeters
+#define WHEEL_CIRC 47.1 // wheel circumference, centimeters
 #define CPR 3200 // encoder counts per wheel rotation
 
 #define MAX_PWM 100
@@ -53,10 +53,8 @@ void _control_loop() {
   double v_error = 0;
   double dt = (millis() - last_millis)/1000.0d;
   last_millis = millis();
-  // this was the implementation from the tutorial doc
-  // my prediction is that it won't work at all, i was right
-  // this line: pwm = Kp_vel*vel_error;   DOES NOT WORK
-  // the real motors cannot have PWM of zero since that will make them brake and completely stop
+  // this is the implementation from the tutorial doc
+  // my prediction is that it won't work at all
 
   // mode switch
   if (left_mode) {
