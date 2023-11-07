@@ -20,16 +20,19 @@ void setup() {
   control_pos(0);
 }
 
+uint32_t I2C_counts = 0;
+
 void loop() {
   // put your main code here, to run repeatedly:
   // do nothing slowly
-  Serial.println(encoders_pos_right());
+  Serial.println(I2C_counts);
   delay(1000);
 }
 
 // called when the arduino recieves an I2C message,
 // in our case this is the wheel position
 void receiveEvent(uint8_t count) {
+  I2C_counts++;
   // we expect to see 4 bytes from the pi
   if (count == 4) {
     // the first 2 bytes are garbage for some reason

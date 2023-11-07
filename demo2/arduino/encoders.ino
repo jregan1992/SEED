@@ -12,8 +12,8 @@ const uint8_t right_A = 3;
 const uint8_t right_B = 6;
 
 // important constants
-#define ROBOT_WIDTH 37.5 // centimeters
-#define WHEEL_CIRC 47.1 // wheel circumference, centimeters
+#define ROBOT_WIDTH 38.0 // centimeters
+#define WHEEL_CIRC 47.2 // wheel circumference, centimeters
 #define CPR 3200 // encoder counts per wheel rotation
 
 
@@ -61,7 +61,7 @@ void _left_ISR() {
   left_sB = n_sB;
 }
 // getter, convert to our linear unit
-float encoders_pos_left() { return left_pos; }
+float encoders_pos_left() { return left_pos * (WHEEL_CIRC/CPR); }
 
 // right encoder state
 volatile bool right_sA = false;
@@ -86,7 +86,7 @@ void _right_ISR() {
   right_sB = n_sB;
 }
 // getter
-float encoders_pos_right() { return right_pos; }
+float encoders_pos_right() { return right_pos * (WHEEL_CIRC/CPR); }
 
 // current position/velocity
 volatile float pos_x = 0; // centimeters

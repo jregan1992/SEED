@@ -1,0 +1,93 @@
+EENG 350, Localization and Control Libraries
+
+
+motors.ino
+ - wraps motor pins in functions and stores motor pin assignments
+
+ void motors_init()
+    - sets up motors, call from setup()
+
+ void motors_enable(bool enabled)
+    - sets the motor enable pin, when disabled motors are allowed to coast
+
+ void motors_dir(bool reverse)
+ void motors_dir_left(bool reverse)
+ void motors_dir_right(bool reverse) 
+    - sets motor direction pin for both motors or individually, true is reverse
+
+ void motors_pwm(uint8_t duty)
+ void motors_pwm_left(uint8_t duty)
+ void motors_pwm_right(uint8_t duty)
+    - sets PWM value on both motors or individually, higher values correspond to higher voltage
+
+
+
+encoders.ino
+ - wraps encoder pins in functions and stores assignments
+ - tracks position of the robot
+ - and has global constants for robot size
+
+ #define ROBOT_WIDTH
+    - robot width, unit here determines distance unit for encoders.ino and basically all the other code
+ 
+ #define WHEEL_CIRC
+    - wheel circumference, unit should match unit of robot_width
+ 
+ #define CPR
+    - encoder counts per rotation of the wheel
+
+ void encoders_init()
+    - sets up encoders, call from setup()
+
+ double encoders_pos_left()
+ double encoders_pos_right()
+    - gets current wheel position in linear centimeters
+
+ double encoders_pos_x()
+ double encoders_pos_y()
+ double encoders_pos_phi()
+    - gets current position of the robot, x y and rotation, considering the initial position to be the origin
+    - units will be in the same units as robot_width and wheel_circ!!
+
+ double encoders_vel_left()
+ double encoders_vel_right()
+    - gets current linear velocity of left or right wheel
+
+
+
+control.ino
+ - contains the feedback control loop for the wheels
+
+ const double Kp_vel
+    - P constant for velocity loop
+
+ const double Kp_pos
+    - P constant for positional loop
+ 
+ const double Ki_pos
+    - I constant for positional loop
+
+ void control_init()
+    - sets up control loop, call from setup()
+
+ uint8_t control_pwm_left()
+ uint8_t control_pwm_right()
+ bool control_dir_left()
+ bool control_dir_right()
+    - get current PWM and direction commands being issued by the control loop
+
+ void control_pos(double p)
+ void control_pos_left(double p)
+ void control_pos_right(double p)
+    - set desired position for both wheels or individually, units in system units
+    - switches wheel into position mode, overriding any velocity command
+
+ void control_vel(double v)
+ void control_vel_left(double v)
+ void control_vel_right(double v)
+    - set desired velocity for both wheels or individually, units in encoder.ino units
+    - switches wheel into velocity mode, overriding any position command
+
+ void control_angle(double a)
+    - sets desired position for both wheels to rotate robot the given number of radians
+    - switches wheel into position mode
