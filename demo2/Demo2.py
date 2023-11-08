@@ -35,7 +35,7 @@ signal.signal(signal.SIGINT, Stop)
 # Arduino comms
 # ========================
 # set up serial
-ser = serial.Serial('/dev/ttyACM1', baudrate=9600)
+ser = serial.Serial('/dev/ttyACM0', baudrate=9600)
 ser.reset_input_buffer()
 # globals
 arduino_lock = False
@@ -87,7 +87,7 @@ def ArduinoThread():
 angle_deg = 0.0
 distanceToMarker = 0
 d = 0
-Dm =  18 #This is the constant defining the size of the marker at 1 marker EDIT TO NEW MARKERS
+Dm = 56  #This is the constant defining the size of the marker at 1 meter, EDIT TO NEW MARKERS
 x_max = 426
 y_max = 240
 actualCenterX = x_max/2
@@ -119,7 +119,15 @@ def cameraProcessing():
             center_y = int(np.mean(corners[i][0][:, 1]))
             
             corner_x = (corners[i][0][:, 0])
-            pixels = corner_x[1]-corner_x[0]
+            corner_y = (corners[i][0][:, 1])
+            
+            # use apparent width of the tag
+            #pixels = corner_x[1]-corner_x[0]
+            
+            # average height of both sides of the marker
+            l_height = corner_y[3] - corner_y[0]
+            r_height = corner_y[2] - corner_y[1]
+            pixels = (l_height + r_height) / 2
 
             # Draw a circle at the center of the marker
             cv2.circle(frame, (center_x, center_y), 5, (0, 255, 0), -1)
@@ -163,15 +171,20 @@ while True:
     
 
     targetAngle = 0
-    targetDistance = .305
+    targetDistance = 0.305
+    targetFudge = 0.005
 
     Kp_L = 3; # tuning params
-    Kp_A = 1; #
+    Kp_A = 1.01; #
+
+    # speed that gets sent to arduino once we're done with the first half, inf to do the rest of the routine
+    doneval = float(0)
+    #doneval = float('inf')
 
     # state machine    
     if state == 'rotate': # slowly spin until marker found
         linear_vel = 0
-        angular_vel = 3.1415/16
+        angular_vel = 3.1415/8
         # state transition
         if (markers_found):
             state = 'forward'
@@ -185,15 +198,17 @@ while True:
         if linear_vel < -5:
             linear_vel = -5.0
             angular_vel = 0.0
+        if linear_vel > 40:
+            linear_vel = 40;
         # state transition
-        if distanceToMarker <= targetDistance and distanceToMarker != -18:
+        if distanceToMarker <= (targetDistance+targetFudge) and distanceToMarker != -Dm:
             state = 'spin'
             print('new state: spin')
             
     elif state == 'spin':
         # arduino should recognize inf and take over
-        linear_vel = float('NaN')
-        angular_vel = float('NaN')
+        linear_vel = doneval
+        angular_vel = doneval
         # state transition
         state = 'done'
         print('new state: done!')
@@ -201,8 +216,8 @@ while True:
         
     elif state == 'done':
         # let arduino control
-        linear_vel = float('NaN')
-        angular_vel = float('NaN')
+        linear_vel = doneval
+        angular_vel = doneval
 
  
     # start threads

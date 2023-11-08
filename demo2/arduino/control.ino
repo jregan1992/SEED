@@ -8,7 +8,7 @@
 // tuneable parameters
 // tuned via a sign from god
 const float Kp_vel = 2;
-const float Kp_pos = 0.5;
+const float Kp_pos = 2;
 const float Ki_pos = 1;
 
 // important constants
