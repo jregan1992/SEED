@@ -96,13 +96,20 @@ bool control_dir_right() { return right_dir; }
 
 float gimme_integrator() { return left_dpos; }
 
-// set a specific encoder position, cm
+// set a specific wheel position, cm
 void control_pos(float p) {
   control_pos_left(p);
   control_pos_right(p); 
 }
 void control_pos_left(float p) { left_dpos = p; left_mode = true; }
 void control_pos_right(float p) { right_dpos = p; right_mode = true; }
+
+// ask for a relative angular change, rad
+void control_angle(float a) {
+  float disp = (ROBOT_WIDTH * a / 2.0f);
+  control_pos_left(encoders_pos_left() + disp);
+  control_pos_right(encoders_pos_right() - disp);
+}
 
 // set velocity, cm/s and rad/s
 void control_vel(float v_linear, float v_angular) {

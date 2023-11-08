@@ -5,25 +5,21 @@ volatile float angular = 0;
 void setup() {
   // Serial
   Serial.begin(9600);
-  Serial.println('r');
   // libraries
   encoders_init();
   motors_init();
   control_init();
-
-  // ~2ft diameter circle
-  //float radius = 30.48f; // 1 foot
-  //float lin_speed = 20.0f; // idk pretty slow
-
-  //float ang_speed = lin_speed/radius;
-  //ang_speed = 0;
-  
-  //control_vel(lin_speed, ang_speed);
+  // reset pi?
+  Serial.println('r');
 }
-
 
 float rec_linear = 0.0f;
 float rec_angular = 0.0f;
+bool nanded = false;
+
+bool didaflip = false;
+float ang_target = 0.0f;
+
 void loop() {
   // check for serial data
   if(Serial.available() >= 8){
@@ -32,11 +28,31 @@ void loop() {
   }
   // are we in control now?
   // this is checking if either of these variables are NaN
-  if (rec_linear != rec_linear || rec_angular != rec_angular) {
-    float radius = 30.48f; // 1 foot
-    linear = 20.0f; // idk pretty slow
-    angular = linear/radius;
-    
+  if (rec_linear != rec_linear || rec_angular != rec_angular || nanded) {
+    nanded = true;
+    // """"state machine""""
+    if (!didaflip) {
+      // turn 90 degrees
+      control_angle(PI/2);
+      //Serial.println("flippin");
+      delay(5000); // tune this?
+      didaflip = true;
+      
+      // where should we point
+      //Serial.println(encoders_pos_phi());
+      ang_target = encoders_pos_phi() - 2.0f*PI;
+      //Serial.println(ang_target);
+    } else if (encoders_pos_phi() > ang_target) {
+      // ~2ft diameter circle
+      //Serial.println(encoders_pos_phi());
+      float radius = 30.48f; // 1 foot
+      linear = 20.0f; // idk pretty slow
+      angular = -1*linear/radius; // negative for CCW
+    } else {
+      // done!!!!!!
+      linear = 0.0f;
+      angular = 0.0f;
+    }
   } else {
     linear = rec_linear;
     angular = rec_angular;
