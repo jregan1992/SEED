@@ -1,18 +1,16 @@
 # import *
 import cv2
 import numpy as np
-from smbus2 import SMBus
 from time import sleep
 import time
 import math
-import adafruit_character_lcd.character_lcd_rgb_i2c as character_lcd
+import serial
 import board
 import struct
 from threading import Thread
 from threading import Lock
 import signal
 import sys
-
 
 # VERY IMPORTANT, KILLS THREADS
 stop_threads = False
@@ -30,14 +28,13 @@ signal.signal(signal.SIGINT, Stop)
 # ========================
 # Arduino comms
 # ========================
-# constants
-ARD_ADDR = 8
-I2C = SMBus(1)
+# set up serial
+ser = serial.Serial('/dev/ttyACM0', baudrate=9600)
+ser.reset_input_buffer()
 # globals
 arduino_lock = False
 linear_vel = 0
 angular_vel = 0
-heading = 0
 
 # returns f as a list of 4 bytes, little endian
 def floatToBits(f):
@@ -61,13 +58,17 @@ def ArduinoThread():
     # globals
     global stop_threads
     global arduino_lock
+    arduino_lock = True
     global linear_vel
     global angular_vel
     # the actual thread code
     while True:
-        arduino_lock = True
         # send speed information
-        I2C.write_block_data(ARD_ADDR, 0, floatToBits(linear_vel) + floatToBits(angular_vel))
+        try:
+            ser.write(struct.pack('<f', linear_vel))
+            ser.write(struct.pack('<f', angular_vel))
+        except:
+            print("Arduino oopsies")
         # don't spam the poor little guy
         if stop_threads:
             return
@@ -77,15 +78,8 @@ def ArduinoThread():
 # ========================
 # Camera processing
 # ========================
-
-
-
-
-
-# ========================
-# Main thread
-# ========================
 angle_deg = 0.0
+distanceToMarker = 0
 d = 0
 Dm =  18 #This is the constant defining the size of the marker at 1 marker EDIT TO NEW MARKERS
 x_max = 426
@@ -101,17 +95,18 @@ parameters.adaptiveThreshWinSizeMax = 200
 cap = cv2.VideoCapture(0)
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, x_max)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, y_max)
-# Load the ArUco
 aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_100)
 
-
-while True:
-    # Read a frame from the camera
+def cameraProcessing():
+    global markers_found
+    global distanceToMarker
+    global angle_deg
     ret, frame = cap.read()
     cv2.imshow('Aruco Marker Detection', frame)
     # Detect markers in the frame
     corners, ids, rejectedImgPoints = cv2.aruco.detectMarkers(frame, aruco_dict, parameters=parameters)
     if ids is not None:
+        markers_found = True
         for i in range(len(ids)):
             # Get the center of the marker
             center_x = int(np.mean(corners[i][0][:, 0]))
@@ -132,44 +127,82 @@ while True:
         if ids is not None and len(ids) > 0:
             vector_x = center_x - frame_center_x
             angle_rad = np.arctan2(vector_x,  frame_center_x)
-            angle_deg = -1*(120/180)*np.degrees(angle_rad)
+            angle_deg = 1*(120/180)*np.degrees(angle_rad)
+        
     else:
         pixels = -1
+        markers_found = False
         
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-
-    print('the marker distance is ' + str(Dm/pixels))
     distanceToMarker = Dm/pixels;
-    
-# vision code ends about here
 
-    targetAngle = 10
+
+
+# ========================
+# Main thread
+# ========================
+markers_found = False
+state = 'rotate'
+
+while True:
+    # potentially move this to it's own thread if we start having processing issues
+    cameraProcessing()
+
+    # check for reset signal from arduino
+    if ser.in_waiting > 0:
+        ch = ser.readline().decode('ascii').rstrip()
+        if ch == 'r':
+            # Arduino just reset, we should to
+            state = 'rotate'
+    
+    targetAngle = 0
     targetDistance = .305
 
-    Kp_L = 4;
-    Kp_A = 2;
+    Kp_L = 3; # tuning params
+    Kp_A = 1; #
 
+    # state machine    
+    if state == 'rotate': # slowly spin until marker found
+        linear_vel = 0
+        angular_vel = 3.1415/10
+        # state transition
+        if (markers_found):
+            state = 'forward'
     
-    if (distanceToMarker <= .305):
-        linear_vel = 0;
-        angular_vel = (3.1415/180) * (angle_deg - targetAngle);
-        #print('made it too marker')
-    #if not within 1 foot
-    elif(distanceToMarker > .305):
-        linear_vel = 10 * (distanceToMarker - targetDistance) * Kp_L
-        angular_vel = (3.1415/180) * (angle_deg - targetAngle)  
-        #print('linear: ' + str(linear_vel) + ', angular: ' + str(angular_vel))
+    elif state == 'forward':
+        # drive towards marker, stopping within 1 foot
+        linear_vel = 25 * (distanceToMarker - targetDistance) * Kp_L
+        angular_vel = (3.1415/180) * (angle_deg - targetAngle) * Kp_A
+        # it gets confused when we don't see a marker
+        if linear_vel < -5:
+            linear_vel = -5.0
+            angular_vel = 0.0
+        # state transition
+        if distanceToMarker <= targetDistance and distanceToMarker != -18:
+            state = 'spin'
+            
+    elif state == 'spin':
+        # arduino should recognize inf and take over
+        linear_vel = float('NaN')
+        angular_vel = float('NaN')
+        # state transition
+        state = 'done'
+        
+    elif state == 'done':
+        print('hallo')
 
+ 
     # start threads
     if not arduino_lock:
         print('starting arduino thread')
         ard_thread = Thread(target=ArduinoThread, args={})
         ard_thread.start()
 
-    print('heading: ' + str(heading))
-    
-    sleep(1)
- 
+    print('state: ' + state + '     lin: ' + str(linear_vel) + '    ang: ' + str(angular_vel) + '      the marker distance is: ' + str(distanceToMarker))
+
+    # end program using q key
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        stop_threads = True
+        break
+
 cap.release()
 cv2.destroyAllWindows()
